@@ -1,3 +1,6 @@
+#===============================================
+# Installation des librairies nécessaires
+#===============================================
 require("PCAmixdata")
 require("FactoMineR")
 require("factoextra")
@@ -8,9 +11,18 @@ library(corrplot)
 library(PCAmixdata)
 library(FactoMineR)
 library(factoextra)
-donnesProjet = load('donneesProjet2A.RData')
 
-#250 individus et 14 variables quantitatives
+#===============================================
+# Chargement des données 
+#===============================================
+donneesProjet = load('donneesProjet2A.RData')
+
+#===============================================
+# Informations sur les datas
+#===============================================
+
+# 250 individus et 14 variables quantitatives
+#------------------------------------
 # 1. Pct.BF : Pourcentage de graisse corporelle en utilisant l'équation de Siri, 495/Densité – 450,
 # 2. Age : Âge (en années),
 # 3. Weight : Poids (en livres – 1 livre = 453,592 grammes),
@@ -25,14 +37,26 @@ donnesProjet = load('donneesProjet2A.RData')
 # 12. Bicep : Circonférence du biceps étendu (en cm),
 # 13. Forearm : Circonférence de l'avant-bras (en cm),
 # 14. Wrist : Circonférence du poignet (en cm) "distal à l'apophyse styloïde".
+#------------------------------------
 
+# Première visualisation du jeu de données
+#------------------------------------
+plot(donneesProjet) 
 
-# Regarder chaque valeur du tableau avant de faire l'ACP
-# --> analyse univariée
+# Statistique descriptive
+#------------------------------------
+head(donneesProjet) 
+summary(donneesProjet) #visualisation stat. de base
+boxplot(donneesProjet,col = c("yellow"),main = paste("Boxplot"), ylab = "Quantiles")
 
+hist(donneesProjet$Age,
+     col = c("blue"),
+     main = paste("Histogramme pour la variable Age"),
+     ylab = "Effectifs",
+     xlab = "Age")
 
-##### correlation analysis ##### 
-
+# Analyse en Composantes Principales
+#------------------------------------
 # Eigen values
 ACP <- PCA(data.frame(donneesProjet), graph=FALSE)
 round(ACP$eig,digit=2)
@@ -41,9 +65,9 @@ round(ACP$eig,digit=2)
 res<-PCAmix(donneesProjet)
 round(res$eig,digits=2)
 
-# Barplot des 70% d'explication selon les dimensions => retenir dim 1 et 2 (somme = 72.48) + critère de Kaiser non ?
+# Barplot des 70% d'explication selon les dimensions => retenir dim 1 et 2 (somme = 72.48)
 barplot(res$eig[,1],main="Eigenvalues",names.arg=1:nrow(res$eig))
-abline(h=1,col=2,lwd=2)
+abline(h=1,col=2,lwd=2) # critère de Kaiser  
 
 plot(res,axes=c(1,2),choice="ind")    # on retrouve ici le graphique des individus (plan 1-2)
 plot(res,axes=c(1,2),choice="cor")    # on retrouve ici le cercle des corrélations
@@ -55,8 +79,10 @@ plot(res,axes=c(1,2),choice="sqload") # on retrouve ici le graphique des "square
 # Bicep dimension 1 / Forearm dimension 1 / Wrist dimension 1
 res$quanti$cos2 # cos2 des dimensions représentés dans la table de chaleur suivante
 
-# Analyse de la corrélation avec table de chaleur
-matCor = cor(donneesProjet)  # calcul de la matrice des correlations lineaires des donnees
+# Analyse de la corrélation
+#------------------------------------
+# calcul de la matrice des correlations lineaires des donnees
+matCor = cor(donneesProjet)  
 
 # forte corrélation => coeff. > 0.7
 matCor2 = matCor
@@ -67,46 +93,50 @@ for(i in 1:nrow(matCor)){
     }
   }
 }
-
 corrplot(matCor,is.corr=TRUE, method="shade", type="lower")
-corrplot(matCor2,is.corr=TRUE, method="shade", type="lower") #Meilleure visualisation des données correlées 
-#### end correlation analysis ####
+corrplot(matCor2,is.corr=TRUE, method="shade", type="lower") # Visualisation des données corrélées exclusivement
 
-#Analyse des résidus du data frame
-
+#===============================================
+# Régression linéaire multiple
+#===============================================
+# Estimation modèle de régression linéaire multiple
+#------------------------------------
 resPct <- lm(Pct.BF~.,data=donneesProjet)
 summary(resPct)
 plot(resPct$fitted,resPct$residuals)
+abline(h=0)
 plot(resPct$fitted,donneesProjet$Pct.BF)
-abline(a=0,b=1)
-shapiro.test(resPct$residuals) # p value 0.09 => non rejet de H0 
+abline(0,1)
 
-##### étude plus fine du modèle
+# Test de normalité des résidus
+#------------------------------------
+shapiro.test(resPct$residuals)
+#p-value = 0.094 => non rejet de H0 : population non distribuée normalement
 
-#Intervalle de confiance
-test = resPct$fitted
-grille.x<-data.frame(x=seq(from=min(test),to=max(test),length.out=5000))
+# Etude plus fine du modèle
+#------------------------------------
 
-ICpred<-predict(resPct,new=grille.x,interval="pred",level=0.95)
-ICmoy<-predict(res,new=grille.x,interval="conf",level=0.95)
+# #Intervalle de confiance
+# test = resPct$fitted
+# grille.x<-data.frame(x=seq(from=min(test),to=max(test),length.out=5000))
+# ICpred<-predict(resPct,new=grille.x,interval="pred",level=0.95)
+# ICmoy<-predict(resPct,new=grille.x,interval="conf",level=0.95)
+# 
+# # Trace de ces intervalles de prevision et de confiance sur le nuage de points
+# plot(x,y)
+# abline(res)
+# matlines(grille.x,cbind(ICpred[,],ICmoy[,-1]),lty=c(1,2,2,3,3),col=c(1,2,2,3,3))
+# legend("bottomright",lty=c(2,3),col=c(2,3),c("IC prevision","IC moy"))
 
-# Trace de ces intervalles de prevision et de confiance sur le nuage de points
-plot(x,y)
-abline(res)
-matlines(grille.x,cbind(ICpred[,],ICmoy[,-1]),lty=c(1,2,2,3,3),col=c(1,2,2,3,3))
-legend("bottomright",lty=c(2,3),col=c(2,3),c("IC prevision","IC moy"))
-
-
-# Étude plus fine du modèle
 dataTest = donneesProjet[,c(1,2,4,5,7,8,9,13,14)]
 resTest = lm(Pct.BF~.,data=dataTest)
 resTest2 = lm(Pct.BF~Hip+Forearm+Thigh+Neck+Height+Age+Wrist+Abdomen,data=donneesProjet)
 summary(resTest)
 summary(resTest2)
 # C'est la même chose
-step(resTest) # Valide notre choix de variables
+step(resTest2) # Valide notre choix de variables
 
 plot(resTest$fitted,resTest$residuals)
 plot(resTest$fitted,dataTest$Pct.BF)
 abline(a=0,b=1)
-shapiro.test(resTest$residuals) # p value 0.09 => rejet H0 ou pas ?
+shapiro.test(resTest$residuals) # p value 0.13 => non rejet de H0 
