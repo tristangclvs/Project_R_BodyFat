@@ -4,13 +4,16 @@
 require("PCAmixdata")
 require("FactoMineR")
 require("factoextra")
+require("Hmisc")
 # install.packages("PCAmixdata")
 # install.packages("FactoMineR")
 # install.packages("factoextra")
+# install.packages("Hmisc")
 library(corrplot)
 library(PCAmixdata)
 library(FactoMineR)
 library(factoextra)
+library(Hmisc)
 
 #===============================================
 # Chargement des données 
@@ -49,11 +52,8 @@ head(donneesProjet)
 summary(donneesProjet) #visualisation stat. de base
 boxplot(donneesProjet,col = c("yellow"),main = paste("Boxplot"), ylab = "Quantiles")
 
-hist(donneesProjet$Age,
-     col = c("blue"),
-     main = paste("Histogramme pour la variable Age"),
-     ylab = "Effectifs",
-     xlab = "Age")
+hist.data.frame(donneesProjet[,2:4])
+hist.data.frame(donneesProjet[,5:14])
 
 # Analyse en Composantes Principales
 #------------------------------------
