@@ -19,28 +19,6 @@ library(Hmisc)
 # Pour charger le dataset donneesProjet:
 # double clic sur le fichier doonneesProjet2A.RData dans le dossier sous jacent
 
-#===============================================
-# Informations sur les datas
-#===============================================
-
-# 250 individus et 14 variables quantitatives
-#------------------------------------
-# 1. Pct.BF : Pourcentage de graisse corporelle en utilisant l'équation de Siri, 495/Densité – 450,
-# 2. Age : Âge (en années),
-# 3. Weight : Poids (en livres – 1 livre = 453,592 grammes),
-# 4. Height : Taille (en pouces=inches – 1 pouce = 2,54 centimètres),
-# 5. Neck : Circonférence du cou (en cm),
-# 6. Chest : Circonférence de la poitrine (en cm),
-# 7. Abdomen : Tour de l'abdomen (en cm) "à l'ombilic et au niveau de la crête iliaque",
-# 8. Hip : Circonférence de la hanche (en cm),
-# 9. Thigh : Circonférence de la cuisse (en cm),
-# 10. Knee : Circonférence du genou (en cm),
-# 11. Ankle : Circonférence de la cheville (en cm),
-# 12. Bicep : Circonférence du biceps étendu (en cm),
-# 13. Forearm : Circonférence de l'avant-bras (en cm),
-# 14. Wrist : Circonférence du poignet (en cm) "distal à l'apophyse styloïde".
-#------------------------------------
-
 # Première visualisation du jeu de données
 #------------------------------------
 plot(donneesProjet) 
@@ -71,9 +49,7 @@ for (i in (1:length(donneesProjet))){
   print(which (donneesProjet[,i]<val2))
   
 }
-# On retient l'outlier 40 - 43 - 214 - 224
-# Car ils reviennent plusieurs fois
-
+# On retient l'outlier 40 - 43 - 214 - 224 car ils reviennent plusieurs fois
 plot(donneesProjet$Ankle,donneesProjet$Height)
 which(donneesProjet$Ankle>32)
 
@@ -93,16 +69,13 @@ plot(val4)
 # Ce sont les individus 31 et 84
 
 val5 = data.frame(res$quanti$cos2)
-
 round(res$eig,digits=2)
 barplot(res$eig[,1],main="Eigenvalues",names.arg=1:nrow(res$eig))
 abline(h=1,col=2,lwd=2)
 
-
 plot(res,axes=c(1,2),choice="ind") # on retrouve ici le graphique des individus (plan 1-2)
 plot(res,axes=c(1,2),choice="cor") # on retrouve ici le cercle des corrélations
 plot(res,axes=c(1,2),choice="sqload") # on retrouve ici le graphique des "square loadings" (plan 1-2)
-
 res$quanti$cos2
 
 # Calcul de la matrice de corrélation
